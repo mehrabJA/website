@@ -1,0 +1,24 @@
+---
+import Layout from "../layouts/Layout.astro";
+import Loader from "../components/Loader.astro";
+import Navbar from "../components/Navbar.astro";
+import Hero from "../components/Hero.astro";
+import About from "../components/About.astro";
+import Marquee from "../components/Marquee.astro";
+import Research from "../components/Research.astro";
+import Projects from "../components/Projects.astro";
+import Story from "../components/Story.astro";
+import Contact from "../components/Contact.astro";
+import Footer from "../components/Footer.astro";
+---
+<Layout>
+<Loader />
+<div class="noise"></div><div class="cursor" id="cursor"></div>
+<Navbar />
+<canvas id="webgl" class="webgl"></canvas>
+<main>
+<Hero />
+<div class="glass-zone"><About /><Marquee /><Research /><Projects /><Story /><Contact /></div>
+</main>
+<Footer />
+</Layout>

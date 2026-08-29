@@ -1,0 +1,16 @@
+{
+  "name": "mehrab-portfolio",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview"
+  },
+  "dependencies": {
+    "astro": "^5.1.0",
+    "three": "^0.171.0",
+    "gsap": "^3.12.5"
+  },
+  "devDependencies": {}
+}

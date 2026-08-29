@@ -1,0 +1,9 @@
+/* Astro migration base - original styles will be split into components next */
+html,body{margin:0;padding:0;background:#070707;}
+
+/* Performance layer */
+img { content-visibility:auto; }
+section { contain: layout paint; }
+@media (max-width: 768px) {
+  .webgl canvas { transform:scale(.98); }
+}
