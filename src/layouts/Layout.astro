@@ -256,8 +256,9 @@ footer{
 .contact-bottom{grid-column:1/-1!important;display:grid!important;grid-template-columns:1fr 1fr 1fr!important;gap:30px!important;padding:38px!important;margin-top:2vh;border:1px solid rgba(255,255,255,.12);border-radius:30px;background:rgba(255,255,255,.035)}
 @media(max-width:900px){.contact{display:flex!important}.contact-bottom{display:flex!important;flex-direction:column!important}.contact-form .form-grid{grid-template-columns:1fr}}
 </style>
-
-<script type="module" src="/src/scripts/main.js"></script>
+<script>
+  import "../scripts/main.js";
+</script>
 </head>
 <body class="is-loading">
 <slot />
