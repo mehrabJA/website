@@ -261,7 +261,14 @@ footer{
 @media(max-width:900px){.contact{display:flex!important}.contact-bottom{display:flex!important;flex-direction:column!important}.contact-form .form-grid{grid-template-columns:1fr}}
 </style>
 
-<script type="module" src="/src/scripts/main.js"></script>
+<style is:global>
+...
+</style>
+
+<script>
+import "../scripts/main.js";
+</script>
+
 </head>
 <body class="is-loading">
 <slot />
