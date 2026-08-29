@@ -6,6 +6,7 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import gsap from 'gsap';
+import { getDevice } from './device.js';
 
 function revealNow(loader, renderer, controls){
   loader.classList.add('hide');
@@ -32,13 +33,26 @@ export function initLoader(){
   // never leave the loading screen — which sits on top of the whole page —
   // stuck forever.
   try {
+    // Per-device settings: phones and other low-power devices (per
+    // device.js — GPU-thermal-limited, memory/CPU constrained, or on a
+    // metered connection) get a much lighter disk (fewer instanced
+    // streaks, no antialiasing, capped pixel ratio) so the intro stays
+    // smooth instead of dropping frames or overheating the device;
+    // desktops/tablets keep the full effect.
+    const device = getDevice();
+    const perf = device.lowPower
+      ? { instanceCount: 900, antialias: false, autoRotateSpeedMul: 0.7 }
+      : device.isTablet
+        ? { instanceCount: 2200, antialias: true, autoRotateSpeedMul: 1 }
+        : { instanceCount: 3800, antialias: true, autoRotateSpeedMul: 1 };
+
     const scene = new THREE.Scene();
     const camera = new THREE.PerspectiveCamera(40, innerWidth / innerHeight, 0.1, 1000);
     camera.position.set(60, 30, 60);
 
-    const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: 'high-performance', alpha: false });
+    const renderer = new THREE.WebGLRenderer({ antialias: perf.antialias, powerPreference: 'high-performance', alpha: false });
     renderer.setSize(innerWidth, innerHeight);
-    renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+    renderer.setPixelRatio(Math.min(devicePixelRatio, device.maxDPR));
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
     renderer.toneMappingExposure = 1.35;
     renderer.domElement.style.position = 'absolute';
@@ -50,7 +64,7 @@ export function initLoader(){
     controls.enableDamping = true;
     controls.dampingFactor = 0.03;
     controls.autoRotate = true;
-    controls.autoRotateSpeed = 0.4;
+    controls.autoRotateSpeed = 0.4 * perf.autoRotateSpeedMul;
     controls.enableZoom = false;
     controls.enablePan = false;
 
@@ -103,9 +117,15 @@ export function initLoader(){
     const coreGroup = new THREE.Group();
     scene.add(coreGroup);
 
+    // Sphere segment counts scale down on low-power devices too — these
+    // are only ever seen at a distance/blurred by bloom-like blending,
+    // so the visual loss is negligible next to the GPU savings.
+    const sphereSeg = device.lowPower ? 32 : 64;
+    const glowSeg = device.lowPower ? 24 : 48;
+
     // Event horizon
     const bhMat = new THREE.MeshBasicMaterial({ color: 0x000000 });
-    coreGroup.add(new THREE.Mesh(new THREE.SphereGeometry(4, 64, 64), bhMat));
+    coreGroup.add(new THREE.Mesh(new THREE.SphereGeometry(4, sphereSeg, sphereSeg), bhMat));
 
     // AI core: a small glowing nucleus so the center never reads as an
     // empty hole while the disk is still forming/orbiting.
@@ -115,7 +135,7 @@ export function initLoader(){
       opacity: 0.28,
       blending: THREE.AdditiveBlending
     });
-    coreGroup.add(new THREE.Mesh(new THREE.SphereGeometry(1.25, 48, 48), coreGlowMat));
+    coreGroup.add(new THREE.Mesh(new THREE.SphereGeometry(1.25, glowSeg, glowSeg), coreGlowMat));
 
     const coreDot = new THREE.Mesh(
       new THREE.SphereGeometry(0.18, 32, 32),
@@ -145,9 +165,9 @@ export function initLoader(){
       `,
       side: THREE.BackSide, transparent: true, blending: THREE.AdditiveBlending
     });
-    coreGroup.add(new THREE.Mesh(new THREE.SphereGeometry(4.25, 64, 64), auraMat));
+    coreGroup.add(new THREE.Mesh(new THREE.SphereGeometry(4.25, sphereSeg, sphereSeg), auraMat));
 
-    const instanceCount = 3800;
+    const instanceCount = perf.instanceCount;
     const streakGeo = new THREE.CylinderGeometry(0.01, 0.12, 2.2, 3);
     streakGeo.rotateX(Math.PI / 2);
 
@@ -238,7 +258,7 @@ export function initLoader(){
       tl.to(diskMaterial.uniforms.uIntensity, { value: s.intensity }, 0);
       tl.to(diskMaterial.uniforms.uOrbitScale, { value: s.orbit }, 0);
       tl.to(auraMat.uniforms.uIntensity, { value: s.intensity }, 0);
-      tl.to(controls, { autoRotateSpeed: s.rotate }, 0);
+      tl.to(controls, { autoRotateSpeed: s.rotate * perf.autoRotateSpeedMul }, 0);
       tl.to(camera.position, { y: s.camY }, 0);
       tl.to(camControl, { distance: s.camDist }, 0);
     }

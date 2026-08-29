@@ -1,5 +1,13 @@
 // Astro performance entry
-const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+import { initDevice } from './device.js';
+
+// Runs synchronously, before anything else: tags <html> with
+// is-mobile/is-tablet/is-desktop/is-ios/is-safari/is-low-power/etc. so
+// both the CSS below and the WebGL modules imported further down can
+// branch on real device/browser capability rather than viewport width
+// alone.
+const device = initDevice();
+const reduce = device.reducedMotion;
 
 // Checks real DOM state rather than a module-local flag, since the
 // normal animated hand-off lives inside loader-three.js (a separate

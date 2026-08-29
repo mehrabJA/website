@@ -2,6 +2,7 @@ import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import { getDevice } from './device.js';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -12,8 +13,16 @@ const qsa = (s) => [...document.querySelectorAll(s)];
 function initCursor(){
   const cursor = qs('#cursor');
   if(!cursor) return;
+  // Touch devices have no real cursor to replace — the ring is CSS-hidden
+  // for them already (is-touch .cursor{display:none}), but skip mounting
+  // the rAF loop and listeners entirely too, so there's no pointless
+  // per-frame work running on phones/tablets.
+  if(getDevice().hasTouch) return;
   let mx = innerWidth/2, my = innerHeight/2, cx = mx, cy = my;
-  window.addEventListener('pointermove', e=>{ mx=e.clientX; my=e.clientY; cursor.style.opacity=1; }, {passive:true});
+  window.addEventListener('pointermove', e=>{
+    if(e.pointerType === 'touch') return;
+    mx=e.clientX; my=e.clientY; cursor.style.opacity=1;
+  }, {passive:true});
   (function loop(){
     cx += (mx-cx)*.18; cy += (my-cy)*.18;
     cursor.style.transform = `translate(${cx}px,${cy}px) translate(-50%,-50%)`;
@@ -91,19 +100,58 @@ function initMagnetic(){
   });
 }
 
-// --- contact form (no backend — confirms locally instead of reloading) ----
+// --- contact form ----------------------------------------------------
+// Submits to Netlify Forms (the form in Contact.astro carries
+// data-netlify="true" + a matching hidden form-name field, which is
+// what makes Netlify's build-time bot detect and provision it). This
+// posts via fetch instead of a normal page-reloading submit so the
+// button can show a real success/error state without navigating away.
 function initContactForm(){
   const form = qs('.contact-form');
   if(!form) return;
+  const encode = (data) => Object.keys(data).map(k => encodeURIComponent(k)+'='+encodeURIComponent(data[k])).join('&');
+
   form.addEventListener('submit', e=>{
     e.preventDefault();
     const btn = form.querySelector('.contact-send');
     if(!btn) return;
     const original = btn.textContent;
-    btn.textContent = 'Message sent ✓';
+    const data = Object.fromEntries(new FormData(form).entries());
+
+    btn.textContent = 'Sending…';
     btn.disabled = true;
-    setTimeout(()=>{ btn.textContent = original; btn.disabled = false; form.reset(); }, 2600);
+
+    fetch('/', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: encode(data)
+    })
+      .then(res => {
+        if(!res.ok) throw new Error('Submit failed: ' + res.status);
+        btn.textContent = 'Message sent ✓';
+        form.reset();
+      })
+      .catch(() => {
+        // Network/host error — never claim success when the message
+        // didn't actually go anywhere.
+        btn.textContent = 'Failed — try again';
+      })
+      .finally(() => {
+        setTimeout(()=>{ btn.textContent = original; btn.disabled = false; }, 2600);
+      });
   });
+
+  // The "Start a Conversation" button in .contact-bottom sits outside
+  // <form>, so it was never wired to anything — clicking it did nothing.
+  // It's a CTA, not a second submit button: scroll it to the actual form
+  // and focus the first field instead of trying to submit from here.
+  const cta = qsa('.contact-bottom .contact-send').find(b => !form.contains(b));
+  if(cta){
+    cta.addEventListener('click', () => {
+      form.scrollIntoView({ behavior:'smooth', block:'center' });
+      form.querySelector('input[name="name"]')?.focus({ preventScroll:true });
+    });
+  }
 }
 
 // --- ambient WebGL background (behind hero / whole page) ------------------
@@ -112,11 +160,23 @@ function initBackground(){
   if(!canvas) return;
 
   try {
+  // Same per-device scaling as the loader: this background scene runs
+  // continuously behind the whole page (not just a 9s intro), so on
+  // low-power devices it's worth being conservative — far fewer
+  // particles/stars, no antialiasing, capped pixel ratio, and OrbitControls
+  // damping/drag disabled on touch (it fights page scrolling on phones).
+  const device = getDevice();
+  const perf = device.lowPower
+    ? { particleCount: 700, starCount: 200, antialias: false }
+    : device.isTablet
+      ? { particleCount: 1600, starCount: 450, antialias: true }
+      : { particleCount: 2600, starCount: 700, antialias: true };
+
   const scene = new THREE.Scene();
   const camera = new THREE.PerspectiveCamera(42, innerWidth/innerHeight, .1, 100);
   camera.position.set(0,0,7);
-  const renderer = new THREE.WebGLRenderer({ canvas, antialias:true, alpha:true });
-  renderer.setPixelRatio(Math.min(devicePixelRatio,1.7));
+  const renderer = new THREE.WebGLRenderer({ canvas, antialias:perf.antialias, alpha:true });
+  renderer.setPixelRatio(Math.min(devicePixelRatio, device.maxDPR));
   renderer.setSize(innerWidth, innerHeight);
   renderer.outputColorSpace = THREE.SRGBColorSpace;
 
@@ -134,7 +194,7 @@ function initBackground(){
   );
   group.add(core);
 
-  const count = 2600;
+  const count = perf.particleCount;
   const pts = new THREE.BufferGeometry();
   const pos = new Float32Array(count*3);
   const col = new Float32Array(count*3);
@@ -160,7 +220,7 @@ function initBackground(){
   ring2.rotation.set(-.42,0,.65);
   group.add(ring1, ring2);
 
-  const starCount = 700;
+  const starCount = perf.starCount;
   const starGeo = new THREE.BufferGeometry();
   const starPos = new Float32Array(starCount*3);
   for(let i=0;i<starCount;i++){
@@ -186,7 +246,14 @@ function initBackground(){
   const controls = new OrbitControls(camera, renderer.domElement);
   controls.enableZoom=false; controls.enablePan=false; controls.enableDamping=true; controls.dampingFactor=.08; controls.autoRotate=false;
   controls.minPolarAngle=Math.PI/2-.55; controls.maxPolarAngle=Math.PI/2+.55;
-  renderer.domElement.style.pointerEvents='auto';
+  // On touch devices this canvas sits full-screen behind the whole page,
+  // so leaving it draggable would hijack every scroll gesture (a finger
+  // drag would spin the scene instead of scrolling the page). Desktop
+  // keeps drag-to-rotate; touch devices only get the pointermove parallax
+  // further down (which touch doesn't fire without a drag anyway), so the
+  // scene stays passive and lets touches pass through to the page.
+  controls.enabled = !device.hasTouch;
+  renderer.domElement.style.pointerEvents = device.hasTouch ? 'none' : 'auto';
   controls.target.set(0,0,0);
 
   const research = qs('#research');

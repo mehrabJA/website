@@ -44,13 +44,30 @@ function toggle(){
   if(enabled) startAmbient(); else sounds.ambient.pause();
 }
 
+let removeGestureListeners = ()=>{};
+
 function startAmbient(){
+  // BUGFIX: `started` used to be set to true *before* we knew whether
+  // play() actually succeeded. The very first attempt (fired from
+  // loader:done) usually has no real user gesture behind it yet, so
+  // the browser silently rejects it — but the old code had already
+  // locked `started` to true, so every later attempt (including a
+  // real click) short-circuited here and did nothing. That's why the
+  // track would sometimes never start even after clicking, and why it
+  // almost never started on mobile (where visitors rarely drag the
+  // loader scene, so the very first — and only — attempt was the
+  // gesture-less one that got rejected and then locked out forever).
   if(!enabled || started) return;
-  started = true;
-  sounds.ambient.play().catch(()=>{});
   sounds.ambient.volume = 0;
-  let v = 0;
-  const t = setInterval(()=>{ v+=.02; sounds.ambient.volume = Math.min(v,AMBIENT_TARGET_VOLUME); if(v>=AMBIENT_TARGET_VOLUME) clearInterval(t); }, 50);
+  sounds.ambient.play().then(()=>{
+    started = true;
+    removeGestureListeners();
+    let v = 0;
+    const t = setInterval(()=>{ v+=.02; sounds.ambient.volume = Math.min(v,AMBIENT_TARGET_VOLUME); if(v>=AMBIENT_TARGET_VOLUME) clearInterval(t); }, 50);
+  }).catch(()=>{
+    // Still blocked (no real user gesture yet) — leave `started` as
+    // false so the next gesture (click/tap/key) can retry.
+  });
 }
 
 function play(name){
@@ -65,10 +82,19 @@ export function initAudio(){
     el.addEventListener('mouseenter', ()=>play('hover'));
     el.addEventListener('click', ()=>play('click'));
   });
-  // Any pointer interaction (including dragging the loader's 3D scene)
-  // counts as a user gesture and unlocks autoplay — start the ambient
-  // track the moment that happens.
-  document.addEventListener('pointerdown', ()=>startAmbient(), { once:true });
+  // Any pointer/touch/keyboard interaction (including dragging the
+  // loader's 3D scene) counts as a user gesture and unlocks autoplay.
+  // These are NOT { once:true } anymore: since startAmbient() now only
+  // flips `started` on a *successful* play(), a rejected first attempt
+  // needs a real chance to retry on the next gesture instead of being
+  // permanently deaf. Each handler removes itself only once playback
+  // has actually started, which also covers mobile (touchstart is the
+  // gesture that actually fires there, pointerdown support varies more
+  // across older mobile WebViews).
+  const gestureEvents = ['pointerdown', 'touchstart', 'keydown'];
+  function onGesture(){ startAmbient(); }
+  removeGestureListeners = () => gestureEvents.forEach(ev => document.removeEventListener(ev, onGesture));
+  gestureEvents.forEach(ev => document.addEventListener(ev, onGesture, { passive:true }));
 
   // Fired by the loader right as it hands off to the main page: a short
   // "boot" chime marks the transition, and we also take this as another
