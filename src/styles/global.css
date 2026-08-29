@@ -7,3 +7,74 @@ section { contain: layout paint; }
 @media (max-width: 768px) {
   .webgl canvas { transform:scale(.98); }
 }
+
+/* Hide the scrollbar chrome entirely (page stays scrollable — this only
+   removes the visible track/thumb, e.g. the grey bar down the side in
+   Chrome/Edge). Applied on <html> since that's the actual scrolling
+   element here (body has no independent scroll of its own). */
+html{ scrollbar-width:none; -ms-overflow-style:none; }
+html::-webkit-scrollbar{ display:none; width:0; height:0; }
+
+/* Real OS cursor is hidden site-wide on non-touch devices so only the
+   custom circle (#cursor, driven by scene.js:initCursor) is visible —
+   otherwise both were showing at once. Touch devices are excluded
+   (html.is-touch below) since they have no OS cursor to hide and
+   `cursor:none` there would just be dead weight. Applied to interactive
+   elements too since links/buttons/inputs set their own `cursor` values
+   that would otherwise win over a plain `body{cursor:none}`. */
+html:not(.is-touch),
+html:not(.is-touch) a,
+html:not(.is-touch) button,
+html:not(.is-touch) input,
+html:not(.is-touch) textarea,
+html:not(.is-touch) [role="button"] { cursor:none; }
+
+/* ------------------------------------------------------------------ */
+/* Device/browser-tier rules — classes set by src/scripts/device.js   */
+/* (initDevice(), runs before anything else in main.js) on <html>.    */
+/* These target actual detected capability, not just viewport width,  */
+/* so e.g. an iPad in landscape (wide viewport, still touch) still    */
+/* gets the touch-target and momentum-scroll treatment below.         */
+/* ------------------------------------------------------------------ */
+
+/* Touch devices: hit targets grow to the ~44px accessibility minimum
+   instead of relying on hover-sized desktop buttons, and native
+   momentum scrolling is enabled since the WebGL canvas no longer eats
+   the gesture (see scene.js: controls.enabled = !hasTouch). */
+html.is-touch .nav-pill a,
+html.is-touch .sound,
+html.is-touch .socials a { min-height:44px; }
+html.is-touch body { -webkit-overflow-scrolling:touch; }
+
+/* Cursor-follower makes no sense without a real pointer — touch has no
+   hover state to drive it, so skip mounting/animating it entirely
+   rather than leaving an invisible dead element. */
+html.is-touch .cursor { display:none; }
+
+/* iOS Safari: 100svh already handles the address-bar resize case used
+   throughout Layout.astro, but WebGL canvases inside a `position:fixed`
+   ancestor are a known repaint/flicker source on iOS specifically —
+   promoting them to their own compositor layer avoids it. */
+html.is-ios .webgl canvas,
+html.is-ios .loader canvas { -webkit-transform:translateZ(0); transform:translateZ(0); }
+
+/* Firefox compiles the loader's custom simplex-noise shader noticeably
+   slower than Chromium/WebKit, which showed up as a visible stall right
+   as the intro starts. Fading the canvas in avoids a hard pop once the
+   shader's ready, at effectively no cost on other browsers. */
+html.is-firefox .loader canvas { animation:fadeInCanvas .4s ease both; }
+@keyframes fadeInCanvas { from{opacity:0} to{opacity:1} }
+
+/* Respect prefers-reduced-motion beyond just skipping the 3D intro
+   (main.js already does that): also stop the marquee ticker and the
+   ambient parallax/rotation-driven transforms sprinkled through the
+   page, since those are equally motion-triggering. */
+html.is-reduced-motion .marquee-track { animation:none !important; }
+html.is-reduced-motion .cursor { transition:none !important; }
+
+/* Low-power tier (phones, save-data, memory/CPU constrained — see
+   device.js) also gets the backdrop-filter blur removed from the nav
+   pill and sound button: it's one of the more GPU-expensive CSS effects
+   still running every frame while the page is interacted with. */
+html.is-low-power .nav-shell,
+html.is-low-power .sound { backdrop-filter:none !important; -webkit-backdrop-filter:none !important; background:rgba(20,20,22,.86) !important; }
