@@ -1,1 +1,112 @@
-<section class="section contact" id="contact"><div class="contact-left"><div class="eyebrow">06 — Contact</div><div class="contact-title">Let's build<br><span>what's next.</span></div><p class="contact-info">I'm always open to discussing new projects, creative ideas or opportunities to be part of your visions.</p><div class="contact-card"><div class="contact-card-row"><span>EMAIL</span><span><a href="mailto:mehrab.jalilian@iau.ir">mehrab.jalilian@iau.ir</a></span></div><div class="contact-card-row"><span>PHONE</span><span><a href="tel:+989360107422">0936 010 7422</a></span></div><div class="contact-card-row"><span>LOCATION</span><span>Tehran, Iran</span></div><div class="contact-card-row"><span>RESPONSE TIME</span><span>Usually within 24 hours</span></div></div><div class="social-title">FIND ME ON</div><div class="socials"><a href="https://github.com/mehrabJA" target="_blank" rel="noopener noreferrer" aria-label="GitHub">GH</a><a href="https://www.linkedin.com/in/mehrab-jalilian" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn">in</a><a href="https://t.me/MEhRAb123456790" target="_blank" rel="noopener noreferrer" aria-label="Telegram">TG</a><a href="mailto:mehrab.jalilian@iau.ir" aria-label="Email">✉</a></div></div><form class="contact-form" name="contact" method="POST" data-netlify="true" data-netlify-honeypot="bot-field" netlify><input type="hidden" name="form-name" value="contact"><p class="bot-field-wrap" style="position:absolute;left:-9999px;top:-9999px" aria-hidden="true"><label>Don't fill this out if you're human: <input name="bot-field" tabindex="-1" autocomplete="off"></label></p><h3>● SEND A MESSAGE</h3><div class="form-grid"><input name="name" required placeholder="Your name"><input name="email" type="email" required placeholder="Your email"></div><input name="subject" placeholder="Subject"><textarea name="message" required placeholder="Your message"></textarea><button class="contact-send" type="submit">Send Message ↗</button><p style="text-align:center;color:var(--muted);font:11px var(--mono);margin-top:20px">🔒 Your information is secure and never shared.</p></form><div class="contact-bottom"><div><span>AVAILABLE FOR WORK</span><h3>I'm currently <em>open</em> for<br>new opportunities.</h3></div><div><span>Typical projects I work on</span><p>AI / ML Systems　 Web Applications<br>Research & Prototyping　 Technical Consulting</p></div><div><span>Have a project in mind?</span><p>Let's create something impactful together.</p><button class="contact-send">Start a Conversation ↗</button></div></div></section>
+<section class="section contact" id="contact">
+  <div class="contact-left">
+    <div class="eyebrow">06 — Contact</div>
+    <h2 class="contact-title">Let's build<br><span>what's next.</span></h2>
+    <p class="contact-info">I'm always open to discussing new projects, creative ideas or opportunities to be part of your visions.</p>
+    <div class="contact-card">
+      <div class="contact-card-row">
+        <span class="card-label">EMAIL</span>
+        <span><a href="mailto:mehrab.jalilian@iau.ir">mehrab.jalilian@iau.ir</a></span>
+      </div>
+      <div class="contact-card-row">
+        <span class="card-label">PHONE</span>
+        <span><a href="tel:+989360107422">0936 010 7422</a></span>
+      </div>
+      <div class="contact-card-row">
+        <span class="card-label">LOCATION</span>
+        <span>Tehran, Iran</span>
+      </div>
+      <div class="contact-card-row">
+        <span class="card-label">RESPONSE TIME</span>
+        <span>Usually within 24 hours</span>
+      </div>
+    </div>
+    <div class="social-title">FIND ME ON</div>
+    <div class="socials">
+      <a href="https://github.com/mehrabJA" target="_blank" rel="noopener noreferrer" aria-label="GitHub">GH</a>
+      <a href="https://www.linkedin.com/in/mehrab-jalilian" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn">in</a>
+      <a href="https://t.me/MEhRAb123456790" target="_blank" rel="noopener noreferrer" aria-label="Telegram">TG</a>
+      <a href="mailto:mehrab.jalilian@iau.ir" aria-label="Email">✉</a>
+    </div>
+  </div>
+
+  <form class="contact-form" name="contact" method="POST" data-netlify="true" data-netlify-honeypot="bot-field" netlify>
+    <input type="hidden" name="form-name" value="contact">
+    <p style="position:absolute;left:-9999px;top:-9999px" aria-hidden="true">
+      <label>Don't fill this out: <input name="bot-field" tabindex="-1" autocomplete="off"></label>
+    </p>
+    <h3>● SEND A MESSAGE</h3>
+    <div class="form-grid">
+      <input name="name" required placeholder="Your name">
+      <input name="email" type="email" required placeholder="Your email">
+    </div>
+    <input name="subject" placeholder="Subject">
+    <textarea name="message" required placeholder="Your message"></textarea>
+    <button class="contact-send" type="submit">Send Message ↗</button>
+    <p style="text-align:center;color:var(--muted);font:11px var(--mono);margin-top:20px">🔒 Your information is secure and never shared.</p>
+  </form>
+
+  <div class="contact-bottom">
+    <div>
+      <span>AVAILABLE FOR WORK</span>
+      <h3>I'm currently <em>open</em> for<br>new opportunities.</h3>
+    </div>
+    <div>
+      <span>Typical projects I work on</span>
+      <p>AI / ML Systems &nbsp;&nbsp; Web Applications<br>Research & Prototyping &nbsp;&nbsp; Technical Consulting</p>
+    </div>
+    <div>
+      <span>Have a project in mind?</span>
+      <p>Let's create something impactful together.</p>
+      <button class="contact-send" onclick="document.querySelector('.contact-form input[name=name]').focus()">Start a Conversation ↗</button>
+    </div>
+  </div>
+</section>
+
+<style>
+.contact {
+  display: grid;
+  grid-template-columns: 0.85fr 1fr;
+  grid-template-rows: auto auto;
+  gap: 5vw;
+  align-items: start;
+  padding: 12vh 6vw 6vh;
+  min-height: 100svh;
+}
+.contact-left { grid-column: 1; grid-row: 1; display: flex; flex-direction: column; }
+.contact-form { grid-column: 2; grid-row: 1; padding: 38px; border-radius: 28px; background: rgba(255,255,255,.04); border: 1px solid rgba(255,255,255,.1); backdrop-filter: blur(12px); display: flex; flex-direction: column; }
+.contact-bottom { grid-column: 1 / -1; grid-row: 2; display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 30px; padding: 38px; border: 1px solid rgba(255,255,255,.1); border-radius: 28px; background: rgba(255,255,255,.03); }
+.contact-title { font: clamp(52px,7vw,105px) var(--serif); font-weight:400; line-height:.86; margin: 2vh 0; letter-spacing:-.04em; }
+.contact-title span { margin-left: 3vw; display: block; }
+.contact-info { color: var(--muted); font-size: 14px; line-height: 1.6; max-width: 380px; }
+.contact-card { margin-top: 2.5vh; }
+.contact-card-row { display: flex; align-items: center; justify-content: space-between; height: 64px; padding: 0 18px; margin-bottom: 8px; border: 1px solid rgba(255,255,255,.1); border-radius: 14px; background: rgba(255,255,255,.03); }
+.card-label { font: 10px var(--mono); letter-spacing: .12em; color: var(--muted); }
+.contact-card-row span:last-child { color: var(--fg); font-size: 13px; }
+.contact-card-row a { color: var(--fg); }
+.contact-card-row a:hover { color: var(--acid); }
+.social-title { margin-top: 28px; font: 10px var(--mono); letter-spacing: .16em; color: var(--muted); }
+.socials { display: flex; gap: 10px; margin-top: 14px; }
+.socials a { width: 48px; height: 48px; border: 1px solid rgba(255,255,255,.12); border-radius: 12px; display: grid; place-items: center; background: rgba(255,255,255,.04); color: var(--acid); font: 13px var(--mono); transition: background .25s, border-color .25s; }
+.socials a:hover { background: rgba(167,139,250,.12); border-color: rgba(167,139,250,.4); }
+.contact-form h3 { font: 11px var(--mono); letter-spacing: .16em; color: var(--muted); margin: 0 0 22px; }
+.form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px; }
+.contact-form input,
+.contact-form textarea { width: 100%; background: rgba(255,255,255,.05); border: 1px solid rgba(255,255,255,.1); border-radius: 10px; padding: 13px 16px; color: var(--fg); font: 13px var(--sans); outline: none; transition: border-color .25s; box-sizing: border-box; margin-bottom: 12px; }
+.contact-form input:focus,
+.contact-form textarea:focus { border-color: rgba(167,139,250,.5); }
+.contact-form textarea { min-height: 130px; resize: vertical; }
+.contact-send { width: 100%; padding: 14px; background: var(--acid); color: #09090b; border: none; border-radius: 10px; font: 600 13px var(--sans); cursor: pointer; transition: opacity .25s, transform .2s; margin-top: 4px; }
+.contact-send:hover { opacity: .88; transform: translateY(-1px); }
+.contact-bottom span { font: 10px var(--mono); letter-spacing: .14em; color: var(--muted); }
+.contact-bottom h3 { font: clamp(22px,2.2vw,34px) var(--serif); font-weight:400; margin: 12px 0 0; line-height: 1.1; }
+.contact-bottom h3 em { color: var(--acid); }
+.contact-bottom p { color: var(--muted); font-size: 13px; line-height: 1.6; margin: 12px 0 0; }
+.contact-bottom .contact-send { width: auto; margin-top: 16px; padding: 11px 20px; }
+@media (max-width: 900px) {
+  .contact { display: flex; flex-direction: column; padding: 10vh 6vw 6vh; gap: 4vh; }
+  .contact-bottom { display: flex; flex-direction: column; gap: 24px; }
+  .form-grid { grid-template-columns: 1fr; }
+  .contact-title { font-size: clamp(48px,14vw,90px); }
+}
+</style>
