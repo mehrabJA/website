@@ -5,8 +5,8 @@ export function initSmoothScroll() {
   let current = window.scrollY;
   let target  = window.scrollY;
   let rafId   = null;
-  const SPEED = 0.09;
-  const STEP  = 120;
+  const SPEED = 0.06;
+  const STEP  = 80;
 
   function onWheel(e) {
     e.preventDefault();
