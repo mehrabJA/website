@@ -47,3 +47,4 @@ if (!reduce) {
 import('./animations.js').then(m => m.initAnimations()).catch(()=>{});
 import('./scene.js').then(m => m.initScene()).catch(()=>{});
 import('./audio-manager.js').then(m => m.initAudio()).catch(()=>{});
+import('./smooth-scroll.js').then(m => m.initSmoothScroll()).catch(()=>{});
